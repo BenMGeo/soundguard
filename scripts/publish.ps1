@@ -25,8 +25,9 @@ $variants = @(
 
 foreach ($v in $variants) {
     $out = Join-Path $dist $v.Name
-    Invoke-Dotnet publish $project -c Release -r win-x64 --self-contained $v.SelfContained `
-        -p:PublishSingleFile=true @($v.Extra) -o $out
+    $publishArgs = @('publish', $project, '-c', 'Release', '-r', 'win-x64', '--self-contained', $v.SelfContained,
+                     '-p:PublishSingleFile=true', '-o', $out) + $v.Extra
+    Invoke-Dotnet @publishArgs
     Get-ChildItem $out -Filter *.pdb | Remove-Item
     Copy-Item (Join-Path $root 'README.md') $out
     Compress-Archive -Path (Join-Path $out '*') -DestinationPath (Join-Path $dist "SoundGuard-$($v.Name).zip") -Force
